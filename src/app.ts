@@ -1,4 +1,3 @@
-import { Console } from "console";
 
 //import ws as WebSocketServer;
 const WebSocketServer = require('ws');
@@ -25,7 +24,7 @@ interface PlayerInfo {
     pos: Position;
     health: number;
 }
-interface Bullet{
+interface Bullet {
     init_pos: Position;
     pos: Position;
     dir: number;
@@ -41,11 +40,11 @@ var update_interval = 30;
 //var player_info_list: PlayerInfo[] = [];
 var connections: any[] = [];
 //var bullets: Bullet[] = [];
-interface GlobalData{
+interface GlobalData {
     players: PlayerInfo[];
     bullets: Bullet[];
 }
-var all_data : GlobalData = { players: [], bullets: [] };
+var all_data: GlobalData = { players: [], bullets: [] };
 
 function distance(pos1: Position, pos2: Position): number {
     return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.x - pos2.x, 2));
@@ -63,7 +62,7 @@ function update() {
     for (let i = 0; i < all_data.bullets.length; i++) {
         let b = all_data.bullets[i];
         b.pos = moveto(b.pos, b.dir, bullet_speed);
-        
+
         if (distance(b.pos, b.init_pos) > bullet_range) {
             all_data.bullets.splice(i, 1);
             continue;
@@ -81,7 +80,7 @@ function update() {
         }
     }
     let to_send = JSON.stringify(all_data);
-    if(last_sent!=to_send) {
+    if (last_sent != to_send) {
         broadcast_data(JSON.stringify(all_data));
         last_sent = to_send;
     }
@@ -110,7 +109,7 @@ wss.on("connection", (ws: any) => {
                     player_id: player_opr.player_id,
                     character: player_opr.character,
                     health: 100,
-                    pos: {x: 100,y: 100}
+                    pos: { x: 100, y: 100 }
                 };
                 all_data.players.push(new_player_info);
                 //console.log(new_player_info);
