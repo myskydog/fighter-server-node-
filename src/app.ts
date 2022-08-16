@@ -1,4 +1,3 @@
-import { Console } from "console";
 
 //import ws as WebSocketServer;
 const WebSocketServer = require('ws');
@@ -25,7 +24,7 @@ interface PlayerInfo {
     pos: Position;
     health: number;
 }
-interface Bullet{
+interface Bullet {
     init_pos: Position;
     pos: Position;
     dir: number;
@@ -65,7 +64,7 @@ function update() {
     for (let i = 0; i < all_data.bullets.length; i++) {
         let b = all_data.bullets[i];
         b.pos = moveto(b.pos, b.dir, bullet_speed);
-        
+
         if (distance(b.pos, b.init_pos) > bullet_range) {
             all_data.bullets.splice(i, 1);
             continue;
@@ -90,7 +89,7 @@ function update() {
         }
     }
     let to_send = JSON.stringify(all_data);
-    if(last_sent!=to_send) {
+    if (last_sent != to_send) {
         broadcast_data(JSON.stringify(all_data));
         all_data.srv_cmds = [];
         last_sent = to_send;
@@ -120,7 +119,7 @@ wss.on("connection", (ws: any) => {
                     player_id: player_opr.player_id,
                     character: player_opr.character,
                     health: 100,
-                    pos: {x: 100,y: 100}
+                    pos: { x: 100, y: 100 }
                 };
                 all_data.players.push(new_player_info);
                 //console.log(new_player_info);
