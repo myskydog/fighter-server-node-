@@ -35,17 +35,19 @@ interface Bullet{
 var bullet_speed = 10;
 var player_speed = 4;
 var bullet_damage = 20;
-var bullet_range = 200;
+var bullet_range = 300;
 var update_interval = 30;
 /////////////////////////////////////////////
 //var player_info_list: PlayerInfo[] = [];
 var connections: any[] = [];
 //var bullets: Bullet[] = [];
+interface ServerCommand { player_id: string;  name: "died" | "quit" }
 interface GlobalData{
     players: PlayerInfo[];
     bullets: Bullet[];
+    srv_cmds: ServerCommand [];
 }
-var all_data : GlobalData = { players: [], bullets: [] };
+var all_data: GlobalData = { players: [], bullets: [], srv_cmds:[] };
 
 function distance(pos1: Position, pos2: Position): number {
     return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.x - pos2.x, 2));
@@ -69,12 +71,19 @@ function update() {
             continue;
         }
         let collision = false;
+        let j = 0;
         for (let p of all_data.players) {
             if (p.player_id != b.player_id && distance(p.pos, b.pos) < 10) {
                 p.health -= bullet_damage;
+                if (p.health <= 0) {
+                    all_data.players.splice(j, 1);
+                    let cmd: ServerCommand = { player_id: p.player_id, name: "died" };
+                    all_data.srv_cmds.push(cmd);
+                }
                 collision = true;
                 break;
             }
+            j++;
         }
         if (collision) {
             all_data.bullets.splice(i, 1);
@@ -83,6 +92,7 @@ function update() {
     let to_send = JSON.stringify(all_data);
     if(last_sent!=to_send) {
         broadcast_data(JSON.stringify(all_data));
+        all_data.srv_cmds = [];
         last_sent = to_send;
     }
 }
@@ -103,7 +113,7 @@ wss.on("connection", (ws: any) => {
         let current_player = null;
         switch (player_opr.cmd) {
             case "login":
-                //console.log(JSON.stringify(player_opr));
+                console.log(JSON.stringify(player_opr));
                 ws.pid = player_opr.player_id;
                 connections.push(ws);
                 let new_player_info: PlayerInfo = {
